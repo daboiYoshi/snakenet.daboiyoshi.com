@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnakeNet Browser — by daboiyoshi.com</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0d1b2e;
+    --navy-light: #122340;
+    --green: #00e676;
+    --green-dim: #00b85c;
+    --green-dark: #007a3d;
+    --text: #e8f0fe;
+    --text-muted: #8fa8c8;
+    --border: rgba(0, 230, 118, 0.2);
+    --card-bg: rgba(18, 35, 64, 0.8);
+    --font: 'Courier New', Courier, monospace;
+  }
+
+  body {
+    background-color: var(--navy);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13, 27, 46, 0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+  }
+
+  .snake-logo {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .snake-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+  }
+
+  .nav-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+
+  .nav-logo-text span:first-child {
+    font-size: 13px;
+    color: var(--green);
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+
+  .nav-logo-text span:last-child {
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .nav-menu {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+  }
+
+  .nav-menu a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 6px 14px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .nav-menu a:hover, .nav-menu a.active {
+    color: var(--green);
+    border-color: var(--border);
+    background: rgba(0,230,118,0.05);
+  }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* HERO */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 5rem 2rem 3rem;
+    text-align: center;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--green);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 14px;
+    margin-bottom: 1.5rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+
+  .hero h1 span { color: var(--green); }
+
+  .hero p {
+    font-size: 15px;
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    border-radius: 5px;
+    font-family: var(--font);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: var(--green);
+    color: #0d1b2e;
+    font-weight: bold;
+  }
+
+  .btn-primary:hover { background: #00ff88; transform: translateY(-1px); }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--green);
+    border: 1px solid var(--border);
+  }
+
+  .btn-outline:hover {
+    background: rgba(0,230,118,0.07);
+    border-color: var(--green);
+  }
+
+  /* BROWSER MOCKUP */
+  .browser-mockup {
+    max-width: 820px;
+    margin: 0 auto 4rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #0a1520;
+  }
+
+  .browser-chrome {
+    background: #0f1f35;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+  }
+
+  .browser-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .browser-tab {
+    background: #1a3050;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .browser-tab.active-tab {
+    background: #0d1b2e;
+    color: var(--green);
+    border-color: rgba(0,230,118,0.4);
+  }
+
+  .tab-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    opacity: 0.6;
+  }
+
+  .browser-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-dots { display: flex; gap: 5px; }
+  .nav-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .nav-dot.r { background: #ff5f57; }
+  .nav-dot.y { background: #febc2e; }
+  .nav-dot.g { background: #28c840; }
+
+  .address-bar {
+    flex: 1;
+    background: #0a1520;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    font-size: 12px;
+    color: var(--green);
+    font-family: var(--font);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .lock-icon { font-size: 10px; color: var(--green-dim); }
+
+  .browser-body {
+    padding: 2rem;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .browser-body .snake-pixel { font-size: 40px; }
+  .browser-body h3 { font-size: 18px; color: var(--green); letter-spacing: 1px; }
+  .browser-body p { font-size: 12px; color: var(--text-muted); }
+
+  /* SECTION */
+  .section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+  }
+
+  .section-label {
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::before { content: '//'; opacity: 0.5; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .card:hover { border-color: var(--green); transform: translateY(-2px); }
+
+  .card-body { padding: 1.25rem; }
+
+  .card-icon { font-size: 22px; margin-bottom: 10px; display: block; }
+
+  .card h3 {
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  .card-link {
+    display: block;
+    padding: 8px 14px;
+    background: rgba(0,230,118,0.06);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--green);
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: background 0.2s;
+  }
+
+  .card-link:hover { background: rgba(0,230,118,0.12); }
+
+  .card.highlight {
+    border-color: rgba(0,230,118,0.5);
+    background: linear-gradient(135deg, rgba(18,35,64,0.9), rgba(0,60,30,0.4));
+  }
+
+  /* FEATURE LIST */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .feature {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .feature-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .feature h4 {
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .feature p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+  /* TECH STACK */
+  .tech-bar {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .tech-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(0,230,118,0.08);
+  }
+
+  .tech-row:last-child { border-bottom: none; }
+
+  .tech-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    width: 140px;
+    flex-shrink: 0;
+  }
+
+  .tech-value {
+    font-size: 12px;
+    color: var(--green);
+  }
+
+  .tech-pill {
+    display: inline-block;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.5px;
+  }
+
+  /* BETA NOTICE */
+  .beta-notice {
+    background: rgba(254,188,46,0.07);
+    border: 1px solid rgba(254,188,46,0.25);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+
+  .beta-notice span { font-size: 18px; flex-shrink: 0; }
+
+  .beta-notice p { font-size: 12px; color: #d4a017; line-height: 1.6; }
+
+  .beta-notice strong { color: #febc2e; }
+
+  /* ABOUT / CONTACT pages */
+  .inner-container {
+    max-width: 760px;
+    margin: 3rem auto;
+    padding: 0 2rem 4rem;
+  }
+
+  .inner-container h2 {
+    font-size: 1.5rem;
+    color: var(--green);
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .inner-container .subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .info-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .info-block h4 {
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .info-block p, .info-block li {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .info-block ul { padding-left: 1.2rem; margin-top: 6px; }
+
+  .info-block a { color: var(--green); text-decoration: none; }
+  .info-block a:hover { text-decoration: underline; }
+
+  .email-highlight {
+    display: inline-block;
+    background: rgba(0,230,118,0.08);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 10px;
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin-top: 6px;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0 2rem;
+    opacity: 0.5;
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+  }
+
+  footer a { color: var(--green); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* CURSOR */
+  .cursor { color: var(--green); animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* DOWNLOAD BTN */
+  .download-banner {
+    background: linear-gradient(135deg, rgba(0,60,30,0.5), rgba(18,35,64,0.9));
+    border: 1px solid rgba(0,230,118,0.4);
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+
+  .download-banner h3 { font-size: 16px; color: var(--green); margin-bottom: 8px; letter-spacing: 1px; }
+  .download-banner p { font-size: 12px; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#" onclick="showPage('home'); return false;">
+    <div class="snake-logo">
+      <img src="https://docs.daboiyoshi.com/SnakeNet/SnakeNetlogoicon.png" alt="SnakeNet" onerror="this.style.display='none'; this.parentElement.textContent='🐍';">
+    </div>
+    <div class="nav-logo-text">
+      <span>SnakeNet Browser</span>
+      <span>by daboiyoshi.com · Snake Arcade 2026</span>
+    </div>
+  </a>
+  <ul class="nav-menu">
+    <li><a href="#" onclick="showPage('home'); return false;" id="nav-home" class="active">HOME</a></li>
+    <li><a href="#" onclick="showPage('features'); return false;" id="nav-features">FEATURES</a></li>
+    <li><a href="#" onclick="showPage('about'); return false;" id="nav-about">ABOUT</a></li>
+    <li><a href="#" onclick="showPage('contact'); return false;" id="nav-contact">CONTACT</a></li>
+    <li><a href="https://www.daboiyoshi.com" target="_blank">↗ MAIN SITE</a></li>
+  </ul>
+</nav>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-badge">&#x25B6; Snake Arcade 2026 — macOS Browser</div>
+    <h1><span>SnakeNet</span> Browser<span class="cursor">_</span></h1>
+    <p>A fast, private, fully customizable macOS web browser built by <strong style="color:var(--text)">daboiyoshi.com</strong> and <strong style="color:var(--text)">Snake Arcade</strong>. Powered by WebKit. No tracking. No cookies. Just the web.</p>
+    <div class="hero-actions">
+      <a href="#" onclick="showPage('features'); return false;" class="btn btn-primary">&#x25B6; See Features</a>
+      <a href="https://docs.daboiyoshi.com/SnakeNet/SnakeNet.dmg" class="btn btn-primary" download>&#x2B73; Download Now</a>
+      <a href="https://www.daboiyoshi.com" target="_blank" class="btn btn-outline">&#x2197; Visit Snake Arcade</a>
+    </div>
+  </div>
+
+  <!-- Browser mockup -->
+  <div style="max-width:820px; margin: 0 auto 4rem; padding: 0 2rem;">
+    <div class="browser-mockup">
+      <div class="browser-chrome">
+        <div class="browser-tabs">
+          <div class="browser-tab active-tab"><div class="tab-dot"></div>SnakeNet Home</div>
+          <div class="browser-tab">🦁 Brave Search</div>
+          <div class="browser-tab">🎮 Snake Arcade</div>
+          <div style="margin-left:6px; display:flex; align-items:center;">
+            <span style="font-size:14px; color:var(--text-muted); padding:0 6px; cursor:pointer;">+</span>
+          </div>
+        </div>
+        <div class="browser-toolbar">
+          <div class="nav-dots">
+            <div class="nav-dot r"></div>
+            <div class="nav-dot y"></div>
+            <div class="nav-dot g"></div>
+          </div>
+          <span style="font-size:16px; color:var(--text-muted); padding:0 2px;">&#x2039;</span>
+          <span style="font-size:16px; color:var(--text-muted); padding:0 2px; opacity:0.3;">&#x203a;</span>
+          <div class="address-bar">
+            <span class="lock-icon">🔒</span>
+            <span>www.daboiyoshi.com</span>
+          </div>
+          <span style="font-size:14px; color:var(--green); padding:0 6px;">🎨</span>
+        </div>
+      </div>
+      <div class="browser-body">
+        <div class="snake-pixel">🐍</div>
+        <h3>Welcome to the internet!</h3>
+        <p>SnakeNet — Private · Fast · Customizable · macOS</p>
+        <div style="display:flex; gap:10px; margin-top:8px; flex-wrap:wrap; justify-content:center;">
+          <span style="font-size:11px; color:var(--green); background:rgba(0,230,118,0.08); border:1px solid var(--border); border-radius:4px; padding:3px 10px;">No Tracking</span>
+          <span style="font-size:11px; color:var(--green); background:rgba(0,230,118,0.08); border:1px solid var(--border); border-radius:4px; padding:3px 10px;">WebKit Powered</span>
+          <span style="font-size:11px; color:var(--green); background:rgba(0,230,118,0.08); border:1px solid var(--border); border-radius:4px; padding:3px 10px;">Multi-Tab</span>
+          <span style="font-size:11px; color:var(--green); background:rgba(0,230,118,0.08); border:1px solid var(--border); border-radius:4px; padding:3px 10px;">Theme Studio</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- Quick cards -->
+  <div class="section">
+    <div class="section-label">Quick Links</div>
+    <div class="cards">
+      <div class="card highlight">
+        <div class="card-body">
+          <span class="card-icon">🎮</span>
+          <h3>Snake Arcade</h3>
+          <p>The home of daboiyoshi.com — games, projects, and the team behind SnakeNet.</p>
+        </div>
+        <a class="card-link" href="https://www.daboiyoshi.com" target="_blank">↗ www.daboiyoshi.com</a>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <span class="card-icon">📦</span>
+          <h3>CDN &amp; Docs</h3>
+          <p>The official daboiyoshi.com file repository, documentation, and IT resources.</p>
+        </div>
+        <a class="card-link" href="https://docs.daboiyoshi.com" target="_blank">↗ docs.daboiyoshi.com</a>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <span class="card-icon">🦁</span>
+          <h3>Brave Search</h3>
+          <p>SnakeNet's default search engine. Private, independent, no big-tech tracking.</p>
+        </div>
+        <a class="card-link" href="https://search.brave.com" target="_blank">↗ search.brave.com</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES PAGE -->
+<div id="page-features" class="page">
+  <div class="inner-container" style="max-width:900px;">
+    <h2>FEATURES<span class="cursor">_</span></h2>
+    <p class="subtitle">// Everything SnakeNet can do</p>
+
+    <div class="beta-notice">
+      <span>⚠️</span>
+      <p><strong>Early Release:</strong> SnakeNet is in active development by daboiyoshi.com. It may be buggy — we're working on it. Thanks for trying it out. Feedback always welcome at <a href="mailto:info@daboiyoshi.com" style="color:#febc2e;">info@daboiyoshi.com</a></p>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem;">Core Browser</div>
+    <div class="features" style="margin-bottom:2rem;">
+      <div class="feature">
+        <div class="feature-icon">🗂️</div>
+        <div>
+          <h4>MULTI-TAB BROWSING</h4>
+          <p>Open unlimited tabs, each with its own independent WebView, live title, and favicon. Chrome-style tab bar with close on hover.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div>
+          <h4>WEBKIT POWERED</h4>
+          <p>Built on Apple's WebKit engine — the same engine as Safari. Fast, native, and fully integrated with macOS.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔍</div>
+        <div>
+          <h4>SMART ADDRESS BAR</h4>
+          <p>Type a URL, a search query, or a domain — SnakeNet figures it out. Auto-adds https://, falls back to Brave Search.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🖼️</div>
+        <div>
+          <h4>TAB FAVICONS</h4>
+          <p>Each tab shows the website's favicon pulled in real time. Spinner shown while the page loads.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📊</div>
+        <div>
+          <h4>PROGRESS BAR</h4>
+          <p>A thin accent-colored loading bar shows page load progress across the top of the browser window.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">👆</div>
+        <div>
+          <h4>SWIPE GESTURES</h4>
+          <p>Native macOS back and forward swipe gestures via trackpad — just like Safari.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem;">Privacy &amp; Security</div>
+    <div class="features" style="margin-bottom:2rem;">
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div>
+          <h4>NO TRACKING</h4>
+          <p>SnakeNet collects zero browsing data. No analytics, no telemetry, no phoning home.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🦁</div>
+        <div>
+          <h4>BRAVE SEARCH DEFAULT</h4>
+          <p>Search queries go to Brave Search — an independent engine with no big-tech data collection.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <div>
+          <h4>macOS SANDBOX</h4>
+          <p>Runs inside Apple's App Sandbox — strictly limited to only outgoing network connections it needs.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem;">Customization</div>
+    <div class="features" style="margin-bottom:2rem;">
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <div>
+          <h4>THEME STUDIO</h4>
+          <p>6 built-in themes: Snake Green, Midnight Blue, Crimson, Purple Night, Solar Light, Clean White. Or build your own with full color pickers.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">💾</div>
+        <div>
+          <h4>PERSISTENT THEMES</h4>
+          <p>Your chosen theme is saved across app launches automatically via UserDefaults.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌙</div>
+        <div>
+          <h4>DARK &amp; LIGHT MODE</h4>
+          <p>Every theme supports dark or light mode. The OS color scheme adapts with your theme choice.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem;">Tech Stack</div>
+    <div class="tech-bar">
+      <div class="tech-row">
+        <span class="tech-label">LANGUAGE</span>
+        <span class="tech-pill">Swift 5</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">UI FRAMEWORK</span>
+        <span class="tech-pill">SwiftUI</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">BROWSER ENGINE</span>
+        <span class="tech-pill">WKWebView (WebKit)</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">PLATFORM</span>
+        <span class="tech-pill">macOS 13+ Ventura</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">DEFAULT SEARCH</span>
+        <span class="tech-pill">Brave Search</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">DEFAULT HOME</span>
+        <span class="tech-pill">www.daboiyoshi.com</span>
+      </div>
+      <div class="tech-row">
+        <span class="tech-label">MADE BY</span>
+        <span class="tech-pill">daboiyoshi.com · Snake Arcade 2026</span>
+      </div>
+    </div>
+
+    <div class="section-label" style="margin-bottom:1rem;">Keyboard Shortcuts</div>
+    <div class="tech-bar">
+      <div class="tech-row"><span class="tech-label">NEW TAB</span><span class="tech-value">⌘ T</span></div>
+      <div class="tech-row"><span class="tech-label">CLOSE TAB</span><span class="tech-value">⌘ W</span></div>
+      <div class="tech-row"><span class="tech-label">FOCUS ADDRESS BAR</span><span class="tech-value">⌘ L</span></div>
+      <div class="tech-row"><span class="tech-label">RELOAD PAGE</span><span class="tech-value">⌘ R</span></div>
+      <div class="tech-row"><span class="tech-label">GO BACK</span><span class="tech-value">⌘ [</span></div>
+      <div class="tech-row"><span class="tech-label">GO FORWARD</span><span class="tech-value">⌘ ]</span></div>
+      <div class="tech-row"><span class="tech-label">THEME STUDIO</span><span class="tech-value">⌘ ,</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT PAGE -->
+<div id="page-about" class="page">
+  <div class="inner-container">
+    <h2>ABOUT<span class="cursor">_</span></h2>
+    <p class="subtitle">// Who made SnakeNet and why</p>
+
+    <div class="info-block">
+      <h4>🐍 What is SnakeNet?</h4>
+      <p>SnakeNet is a macOS web browser built from scratch using Swift and SwiftUI by <a href="https://www.daboiyoshi.com" target="_blank">daboiyoshi.com</a> — the team behind Snake Arcade. It was built as a personal, private, and fully customizable alternative to mainstream browsers, with a focus on simplicity and privacy.</p>
+    </div>
+
+    <div class="info-block">
+      <h4>🎮 Snake Arcade &amp; daboiyoshi.com</h4>
+      <p>daboiyoshi.com is the home of Snake Arcade — a games, projects, and IT platform run independently in 2026. SnakeNet is one of our side projects, made available to anyone who wants a lightweight macOS browser they can call their own.</p>
+      <p style="margin-top:8px;"><a href="https://www.daboiyoshi.com" target="_blank">↗ Visit Snake Arcade</a></p>
+    </div>
+
+    <div class="info-block">
+      <h4>📦 docs.daboiyoshi.com — Our CDN</h4>
+      <p>The daboiyoshi.com CDN and file repository hosts documentation, files, and resources for our projects. It's the backbone of our platform and where you can find everything from guides to downloads.</p>
+      <p style="margin-top:8px;"><a href="https://docs.daboiyoshi.com" target="_blank">↗ Visit the CDN</a></p>
+    </div>
+
+    <div class="info-block">
+      <h4>⚠️ Early Release Disclaimer</h4>
+      <p>SnakeNet is an early-stage project. It <strong style="color:var(--text)">may be buggy</strong> — features might not work perfectly on every machine or macOS version. We're continuously improving it. If you run into issues, please reach out.</p>
+      <ul>
+        <li>Some sites may not render perfectly</li>
+        <li>WebKit usage state warnings in the console are harmless</li>
+        <li>Requires macOS 13 Ventura or later</li>
+        <li>Must be built from source in Xcode — no signed installer yet</li>
+      </ul>
+    </div>
+
+    <div class="info-block">
+      <h4>⚖️ Terms &amp; Privacy</h4>
+      <p>SnakeNet does not collect any user data. No analytics, no crash reports, no telemetry of any kind. For daboiyoshi.com's broader terms, see: <a href="https://docs.daboiyoshi.com/tos.pdf" target="_blank">↗ Terms of Service</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT PAGE -->
+<div id="page-contact" class="page">
+  <div class="inner-container" style="max-width:600px;">
+    <h2>CONTACT<span class="cursor">_</span></h2>
+    <p class="subtitle">// Reach out to the daboiyoshi.com team</p>
+
+    <div class="info-block">
+      <h4>✉️ Email Us</h4>
+      <p>Got a bug report, feature request, or just want to say hi? Email us directly:</p>
+      <p style="margin-top:8px;"><a href="mailto:info@daboiyoshi.com" class="email-highlight">✉ info@daboiyoshi.com</a></p>
+      <p style="margin-top:10px;">We typically respond within 24–48 hours on business days.</p>
+    </div>
+
+    <div class="info-block">
+      <h4>🐛 Reporting a Bug</h4>
+      <p>SnakeNet is early-stage and may be buggy. When reporting an issue, please include:</p>
+      <ul>
+        <li>Your macOS version (e.g., Ventura 13.5)</li>
+        <li>What you were doing when the issue happened</li>
+        <li>A screenshot if possible</li>
+        <li>The URL of the site that caused the problem</li>
+      </ul>
+      <p style="margin-top:8px;">Send all reports to <a href="mailto:info@daboiyoshi.com">info@daboiyoshi.com</a> with subject line: <em>"SnakeNet Bug Report"</em></p>
+    </div>
+
+    <div class="info-block">
+      <h4>🎮 Main Site</h4>
+      <p>For everything else daboiyoshi.com related — games, projects, and team info:</p>
+      <p style="margin-top:8px;"><a href="https://www.daboiyoshi.com" target="_blank">↗ www.daboiyoshi.com</a></p>
+    </div>
+
+    <div class="info-block">
+      <h4>▶️ YouTube</h4>
+      <p>Check out our channel for tutorials, game content, and project updates:</p>
+      <p style="margin-top:8px;"><a href="https://www.youtube.com/@daboiYoshi_tfsaviation" target="_blank">↗ youtube.com/@daboiYoshi_tfsaviation</a></p>
+    </div>
+
+    <div class="info-block">
+      <h4>📦 CDN &amp; Docs</h4>
+      <p>Browse our file repository and documentation at:</p>
+      <p style="margin-top:8px;"><a href="https://docs.daboiyoshi.com" target="_blank">↗ docs.daboiyoshi.com</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>&copy; 2026 daboiyoshi.com &amp; Snake Arcade &mdash;
+    <a href="https://www.daboiyoshi.com">Main Site</a> &nbsp;|&nbsp;
+    <a href="https://docs.daboiyoshi.com">CDN Docs</a> &nbsp;|&nbsp;
+    <a href="https://search.brave.com" target="_blank">Brave Search</a> &nbsp;|&nbsp;
+    <a href="https://docs.daboiyoshi.com/tos.pdf">Terms of Service</a> &nbsp;|&nbsp;
+    <a href="mailto:info@daboiyoshi.com">Contact</a>
+  </p>
+</footer>
+
+<script>
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + id).classList.add('active');
+    document.querySelectorAll('.nav-menu a').forEach(a => a.classList.remove('active'));
+    var el = document.getElementById('nav-' + id);
+    if (el) el.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
